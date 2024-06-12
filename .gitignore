@@ -1,0 +1,7 @@
+*go.sum
+*.env
+*.env.consumer
+*.env.publisher
+*.env.*
+*go.work.sum
+*.DS_Store

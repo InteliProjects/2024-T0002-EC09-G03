@@ -1,0 +1,44 @@
+version: "3"
+services:
+  mongo:
+    container_name: mongo
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - my-db:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping")' | mongo localhost:27017/test --quiet
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    restart: always
+
+  rabbitmq:
+    container_name: rabbitmq
+    build: ./rabbitmq
+    environment:
+      # RABBITMQ_ERLANG_COOKIE: 'SWQOKODSQALRPCLNMEQG'
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "password"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '-rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"'
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "1883:1883" # default port for MQTT
+    volumes:
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    restart: always
+
+# Names our volume
+volumes:
+  my-db:
